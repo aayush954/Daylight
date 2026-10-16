@@ -22,6 +22,7 @@ const initialPreferences = { theme: 'light', accent: '#64856d', font: 'Inter', f
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('daylight_token') || '');
   const [user, setUser] = useState(null);
+  const [previewMode, setPreviewMode] = useState(false);
   const [authMode, setAuthMode] = useState('register');
   const [auth, setAuth] = useState({ name: '', email: '', password: '' });
   const [authBusy, setAuthBusy] = useState(false);
@@ -41,7 +42,7 @@ export default function App() {
   const [chatInput, setChatInput] = useState('');
   const [webSearch, setWebSearch] = useState(true);
   const [chatBusy, setChatBusy] = useState(false);
-  const demo = !user;
+  const demo = previewMode || !user;
 
   useEffect(() => {
     if (!token) { setUser(null); return; }
@@ -78,7 +79,7 @@ export default function App() {
       setToast(authMode === 'register' ? 'Your workspace is ready. Welcome to Daylight!' : 'Welcome back.');
     } catch (err) { setAuthError(err.message); } finally { setAuthBusy(false); }
   }
-  function signOut() { localStorage.removeItem('daylight_token'); setToken(''); setUser(null); setTasks(demoTasks); setActivities([]); setPage('Overview'); }
+  function signOut() { localStorage.removeItem('daylight_token'); setToken(''); setUser(null); setPreviewMode(false); setTasks(demoTasks); setActivities([]); setPage('Overview'); }
   async function addTask(e) {
     e.preventDefault(); if (!draft.title.trim()) return;
     try {
@@ -124,7 +125,7 @@ export default function App() {
     if (!demo) try { await api('/auth/preferences', { method: 'PATCH', body: JSON.stringify(next) }, token); } catch (err) { setToast(err.message); }
   }
 
-  if (!token || !user) return <AuthScreen auth={auth} setAuth={setAuth} mode={authMode} setMode={setAuthMode} submit={authenticate} busy={authBusy} error={authError} explore={() => { setToken('preview'); setUser({ name: 'Guest' }); setTasks(demoTasks); }} />;
+  if (!previewMode && (!token || !user)) return <AuthScreen auth={auth} setAuth={setAuth} mode={authMode} setMode={setAuthMode} submit={authenticate} busy={authBusy} error={authError} explore={() => { setPreviewMode(true); setUser({ name: 'Guest' }); setTasks(demoTasks); }} />;
 
   return <div className="app-shell">
     {mobileNav && <button className="mobile-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)} />}
