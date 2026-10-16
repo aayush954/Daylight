@@ -144,11 +144,6 @@ app.delete('/api/activities/:id', requireAuth, asyncRoute(async (req, res) => {
   res.json({ ok: true });
 }));
 
-app.delete('/api/activities/:id', requireAuth, asyncRoute(async (req, res) => {
-  const result = await Activity.deleteOne({ _id: req.params.id, user: req.userId });
-  if (!result.deletedCount) return res.status(404).json({ message: 'Activity not found.' });
-  res.json({ ok: true });
-}));
 
 app.post('/api/coach', requireAuth, asyncRoute(async (req, res) => {
   const message = String(req.body.message || '').trim().slice(0,2000);
